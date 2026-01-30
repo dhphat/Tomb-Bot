@@ -1,0 +1,5 @@
+{
+  "name": "Tomb of the Aero-Bot",
+  "description": "A vertical endless descent game where you guide an archaeology robot through an ancient Egyptian tomb. Tap to zig-zag, avoid traps, and collect relics.",
+  "requestFramePermissions": []
+}

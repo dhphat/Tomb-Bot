@@ -181,7 +181,7 @@ const GameUI: React.FC<GameUIProps> = ({
             <span className="text-gray-500 font-mono text-xs">BEST DEPTH</span>
             <div className="flex items-center gap-2">
               {isNewRecord && <Crown className="w-3 h-3 text-yellow-400" />}
-              <span className="text-xl font-bold text-gray-300">{Math.max(score, highScore)}m</span>
+              <span className="text-xl font-bold text-gray-300">{(Math.max(score, isNaN(highScore) ? 0 : highScore))}m</span>
             </div>
           </div>
         </div>

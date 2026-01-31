@@ -15,7 +15,8 @@ const App: React.FC = () => {
     const fetchScore = async () => {
       setIsLoadingHighScore(true);
       const fetchedScore = await loadHighScore();
-      setHighScore(fetchedScore);
+      const validScore = isNaN(Number(fetchedScore)) ? 0 : Number(fetchedScore);
+      setHighScore(validScore);
       setIsLoadingHighScore(false);
     };
     fetchScore();

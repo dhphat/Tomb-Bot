@@ -14,9 +14,14 @@ const App: React.FC = () => {
   useEffect(() => {
     const fetchScore = async () => {
       setIsLoadingHighScore(true);
-      const fetchedScore = await loadHighScore();
-      const validScore = isNaN(Number(fetchedScore)) ? 0 : Number(fetchedScore);
-      setHighScore(validScore);
+      try {
+        const fetchedScore = await loadHighScore();
+        const validScore = Number.isFinite(Number(fetchedScore)) ? Number(fetchedScore) : 0;
+        setHighScore(validScore);
+      } catch (e) {
+        console.error('Error in initial fetch:', e);
+        setHighScore(0);
+      }
       setIsLoadingHighScore(false);
     };
     fetchScore();
@@ -25,13 +30,14 @@ const App: React.FC = () => {
   // Save high score to HighScoreService whenever it changes
   const updateHighScore = (valueOrFn: number | ((prev: number) => number)) => {
     setHighScore(current => {
-      const next = typeof valueOrFn === 'function' ? valueOrFn(current) : valueOrFn;
-      // Chỉ lưu nếu thực sự là con số hợp lệ và lớn hơn điểm cũ (nếu muốn) 
-      // hoặc đơn giản là lưu giá trị mới nhất.
-      if (!isNaN(next)) {
-        saveHighScore(next);
+      const safeCurrent = Number.isFinite(Number(current)) ? Number(current) : 0;
+      const next = typeof valueOrFn === 'function' ? valueOrFn(safeCurrent) : valueOrFn;
+      const safeNext = Number.isFinite(Number(next)) ? Number(next) : 0;
+
+      if (safeNext > 0) {
+        saveHighScore(safeNext);
       }
-      return next;
+      return safeNext;
     });
   };
 
@@ -62,6 +68,7 @@ const App: React.FC = () => {
         onRestart={restartGame}
         isLoadingHighScore={isLoadingHighScore}
       />
+
     </div>
   );
 };

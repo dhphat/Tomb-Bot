@@ -151,7 +151,7 @@ const GameUI: React.FC<GameUIProps> = ({
         {/* Footer Text */}
         <div className="w-full pb-4">
           <p className="text-[10px] md:text-xs text-cyan-500/60 font-mono tracking-widest uppercase border-t border-white/5 pt-4">
-            FIRST Tech Challenge Vietnam | Mini Game {highScore > 0 ? `| GLOBAL BEST: ${highScore}m` : ''}
+            FIRST Tech Challenge Vietnam | Mini Game {safeHighScore > 0 ? `| GLOBAL BEST: ${safeHighScore}m` : ''}
           </p>
         </div>
       </div>

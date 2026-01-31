@@ -2,47 +2,26 @@ export const GAS_APP_URL = 'https://script.google.com/macros/s/AKfycbxUTN9F06rbx
 
 export const loadHighScore = async (): Promise<number> => {
     try {
-        const response = await fetch(GAS_APP_URL, {
-            method: 'GET',
-            mode: 'cors',
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
+        const response = await fetch(GAS_APP_URL);
         const data = await response.json();
         const score = Number(data.highScore);
         return isNaN(score) ? 0 : score;
     } catch (error) {
-        console.error('Failed to load high score from Google Sheets:', error);
+        console.error('Failed to load high score:', error);
         const saved = localStorage.getItem('aerobot_highscore');
-        if (saved) {
-            const parsed = Number(saved);
-            return isNaN(parsed) ? 0 : parsed;
-        }
-        return 0;
+        return saved ? Number(saved) || 0 : 0;
     }
 };
 
 export const saveHighScore = async (score: number): Promise<void> => {
-    // 1. Luôn lưu local trước để đảm bảo không mất dữ liệu
-    try {
-        localStorage.setItem('aerobot_highscore', score.toString());
-    } catch (e) {
-        console.error('Failed to save to local storage:', e);
-    }
+    // 1. Luôn lưu local trước
+    localStorage.setItem('aerobot_highscore', score.toString());
 
-    // 2. Cố gắng gửi lên Google Sheets
+    // 2. Gửi qua URL (GET) - Đây là cách ổn định nhất với Google Apps Script
     try {
-        // Sử dụng mode: 'no-cors' và gửi dưới dạng text để tránh lỗi CORS preflight
-        await fetch(GAS_APP_URL, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: {
-                'Content-Type': 'text/plain',
-            },
-            body: JSON.stringify({ score: score }),
+        await fetch(`${GAS_APP_URL}?score=${score}`, {
+            method: 'GET',
+            mode: 'no-cors' // Chế độ này giúp gửi dữ liệu mà không bị chặn bởi CORS
         });
     } catch (error) {
         console.error('Failed to save high score to Google Sheets:', error);

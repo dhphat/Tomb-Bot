@@ -159,7 +159,6 @@ const GameUI: React.FC<GameUIProps> = ({
   }
 
   if (gameState === GameState.GAME_OVER) {
-    const isNewRecord = score > highScore && highScore > 0;
 
     return (
       <div className="absolute inset-0 flex flex-col items-center justify-center bg-red-900/80 backdrop-blur-md p-6 text-center animate-in zoom-in duration-300">

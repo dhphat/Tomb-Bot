@@ -42,10 +42,9 @@ const GameUI: React.FC<GameUIProps> = ({
     document.addEventListener('fullscreenchange', handleFullscreenChange);
     return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, []);
-  // Logic to determine if we are currently beating the record
-  // We check if score > highScore. 
-  // Note: highScore prop is the *starting* high score loaded from storage.
-  const isNewRecord = score > highScore && highScore > 0;
+  const safeScore = isNaN(Number(score)) ? 0 : Number(score);
+  const safeHighScore = isNaN(Number(highScore)) ? 0 : Number(highScore);
+  const isNewRecord = safeScore > safeHighScore && safeHighScore > 0;
 
   if (gameState === GameState.PLAYING) {
     return (
@@ -67,13 +66,13 @@ const GameUI: React.FC<GameUIProps> = ({
                 <Trophy className="w-5 h-5 text-yellow-600" />
               )}
               <span className={`text-3xl font-black tracking-tighter ${isNewRecord ? 'text-yellow-300 drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]' : ''}`}>
-                {score}m
+                {safeScore}m
               </span>
             </div>
 
             {/* Subtext: Best or New Record */}
             <div className={`text-[10px] uppercase tracking-widest font-bold mt-1 ml-1 ${isNewRecord ? 'text-yellow-300 animate-pulse' : 'text-gray-400'}`}>
-              {isNewRecord ? '★ NEW RECORD!' : `BEST: ${highScore}m`}
+              {isNewRecord ? '★ NEW RECORD!' : `BEST: ${safeHighScore}m`}
             </div>
           </div>
         </div>
@@ -174,14 +173,14 @@ const GameUI: React.FC<GameUIProps> = ({
 
           <div className="flex justify-between items-end mb-2 relative z-10">
             <span className="text-gray-400 font-mono text-sm">DEPTH REACHED</span>
-            <span className={`text-3xl font-bold ${isNewRecord ? 'text-yellow-300' : 'text-yellow-400'}`}>{score}m</span>
+            <span className={`text-3xl font-bold ${isNewRecord ? 'text-yellow-300' : 'text-yellow-400'}`}>{safeScore}m</span>
           </div>
           <div className="w-full h-px bg-white/10 my-2"></div>
           <div className="flex justify-between items-center relative z-10">
             <span className="text-gray-500 font-mono text-xs">BEST DEPTH</span>
             <div className="flex items-center gap-2">
               {isNewRecord && <Crown className="w-3 h-3 text-yellow-400" />}
-              <span className="text-xl font-bold text-gray-300">{(Math.max(score, isNaN(highScore) ? 0 : highScore))}m</span>
+              <span className="text-xl font-bold text-gray-300">{Math.max(safeScore, safeHighScore)}m</span>
             </div>
           </div>
         </div>

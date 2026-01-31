@@ -23,9 +23,16 @@ const App: React.FC = () => {
   }, []);
 
   // Save high score to HighScoreService whenever it changes
-  const updateHighScore = (newHighScore: number) => {
-    setHighScore(newHighScore);
-    saveHighScore(newHighScore);
+  const updateHighScore = (valueOrFn: number | ((prev: number) => number)) => {
+    setHighScore(current => {
+      const next = typeof valueOrFn === 'function' ? valueOrFn(current) : valueOrFn;
+      // Chỉ lưu nếu thực sự là con số hợp lệ và lớn hơn điểm cũ (nếu muốn) 
+      // hoặc đơn giản là lưu giá trị mới nhất.
+      if (!isNaN(next)) {
+        saveHighScore(next);
+      }
+      return next;
+    });
   };
 
   const startGame = () => {

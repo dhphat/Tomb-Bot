@@ -2,29 +2,52 @@ export const GAS_APP_URL = 'https://script.google.com/macros/s/AKfycbxUTN9F06rbx
 
 export const loadHighScore = async (): Promise<number> => {
     try {
+        const response = await fetch(GAS_APP_URL, {
+            method: 'GET',
+            mode: 'cors',
+        });
 
-        const response = await fetch(GAS_APP_URL);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
         const data = await response.json();
-        return data.highScore || 0;
+        const score = parseInt(data.highScore, 10);
+        return isNaN(score) ? 0 : score;
     } catch (error) {
         console.error('Failed to load high score from Google Sheets:', error);
-        const saved = localStorage.getItem('aerobot_highscore');
-        return saved ? parseInt(saved, 10) : 0;
+        try {
+            const saved = localStorage.getItem('aerobot_highscore');
+            if (saved) {
+                const parsed = parseInt(saved, 10);
+                return isNaN(parsed) ? 0 : parsed;
+            }
+        } catch (e) {
+            console.error('Failed to load from local storage:', e);
+        }
+        return 0;
     }
 };
 
 export const saveHighScore = async (score: number): Promise<void> => {
+    // 1. Luôn lưu local trước để đảm bảo không mất dữ liệu
     try {
-        // Luôn lưu local trước
         localStorage.setItem('aerobot_highscore', score.toString());
+    } catch (e) {
+        console.error('Failed to save to local storage:', e);
+    }
 
+    // 2. Cố gắng gửi lên Google Sheets
+    try {
+        // Sử dụng mode: 'no-cors' và gửi dưới dạng text để tránh lỗi CORS preflight
+        // GAS sẽ vẫn nhận được data này trong e.postData.contents
         await fetch(GAS_APP_URL, {
             method: 'POST',
-            mode: 'no-cors', // Sử dụng no-cors để tránh vấn đề CORS với GAS
+            mode: 'no-cors',
             headers: {
-                'Content-Type': 'application/json',
+                'Content-Type': 'text/plain', // Dùng text/plain để tránh preflight check
             },
-            body: JSON.stringify({ score }),
+            body: JSON.stringify({ score: score }),
         });
     } catch (error) {
         console.error('Failed to save high score to Google Sheets:', error);
